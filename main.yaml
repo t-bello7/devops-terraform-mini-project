@@ -1,0 +1,33 @@
+- name: Setup apache server
+  hosts: vm
+  become: yes
+  remote_user: ubuntu
+  tasks:
+   - name: Install LAMP Packages
+     apt: name={{ item }} update_cache=yes state=latest
+     loop: ['apache2', 'php', 'libapache2-mod-php']
+     notify: Restart Apache
+
+   - name: Set timezone to Africa/Lagos
+     command: timedatectl set-timezone Africa/Lagos
+
+   - name: Delete content & directory
+     file:
+      state: absent
+      path: /var/www/html/index.html
+
+   - name: Set up Php index page
+     template:
+      src: "./index.php"
+      dest: "/var/www/html/index.php"
+
+  handlers:
+   - name: Reload Apache
+     service: 
+      name: apache2
+      state: reloaded
+   
+   - name: Restart Apache
+     service:
+      name: apache2
+      state: restarted
