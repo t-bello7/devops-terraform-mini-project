@@ -1,33 +1,27 @@
-# resource "aws_route53_zone" "main" {
-#   name = "tomiclouddev.com"
-# }
+resource "aws_route53_zone" "main" {
+  name = "tomidev.me"
+}
 
-# resource "aws_route53_zone" "terraform-test" {
-#   name = "terraform-test.tomiclouddev.com"
+resource "aws_route53_record" "terraform-test" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "terraform-test.tomidev.me"
+  type    = "A"
 
-#   tags = {
-#     Environment = "terraform"
-#   }
-# }
+  alias {
+    name                   = aws_lb.publicalb.dns_name
+    zone_id                = aws_lb.publicalb.zone_id
+    evaluate_target_health = true
+  }
+}
 
-# data "aws_network_interface" "lb" {
-#   for_each = data.aws_subnets.subnet
+resource "aws_route53_record" "www-terraform-test" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "www.terraform-test.tomidev.me"
+  type    = "A"
 
-#   filter {
-#     name   = "description"
-#     values = ["ELB ${aws_lb.publicalb.arn_suffix}"]
-#   }
-
-#   filter {
-#     name   = "subnet-id"
-#     values = [each.value]
-#   }
-# }
-
-# resource "aws_route53_record" "terraform-a" {
-#   zone_id = aws_route53_zone.main.zone_id
-#   name    = "terraform-test.tomiclouddev.com"
-#   type    = "A"
-#   ttl     = "30"
-#   records = data.aws_network_interface.lb[*].private_ip
-# }
+  alias {
+    name                   = aws_lb.publicalb.dns_name
+    zone_id                = aws_lb.publicalb.zone_id
+    evaluate_target_health = true
+  }
+}
